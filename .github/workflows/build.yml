@@ -1,0 +1,76 @@
+name: Build Binaries
+
+on: 
+  push
+
+jobs:
+
+  build-sdk:
+    runs-on: ubuntu-20.04
+    container:
+      image: debian:bullseye
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install build requirements
+      run: ./.github/scripts/req.sh
+    - name: Retrieve SDK Scripts
+      run: |
+        mkdir -p ./build && cd ./build
+        wget --no-check-certificate https://github.com/PSDK3v2-Linux/build/archive/077b037cbd5cf184a09598b71a9fd37c3e4ac85b.tar.gz -O psdk3.tar.gz
+        mkdir psdk3 && tar --strip-components=1 --directory=psdk3 -xvzf psdk3.tar.gz
+    - name: Build release
+      run: ./build/psdk3/build-sudo.sh
+    - name: Compress release folder
+      run: tar --directory=/usr/local --owner=0 --group=0 -zcvf ./psdk3-linux-bullseye.tar.gz PSDK3v2
+    - name: Upload SDK
+      uses: actions/upload-artifact@v2
+      with:
+        name: release-artifact
+        path: ./psdk3-linux-bullseye.tar.gz
+
+  build-dev:
+    runs-on: ubuntu-20.04
+    container:
+      image: debian:bullseye
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install build requirements
+      run: ./.github/scripts/req.sh
+    - name: Retrieve SDK Scripts
+      run: |
+        mkdir -p ./build && cd ./build
+        wget --no-check-certificate https://github.com/PS3SDK-Misc/toolchain-buk/archive/0858c8526b4a232cade85ef596ec9ac6c056cfa3.tar.gz -O toolchain.tar.gz
+        mkdir toolchain && tar --strip-components=1 --directory=toolchain -xvzf toolchain.tar.gz
+    - name: Build release
+      run: ./build/toolchain/toolchain-sudo.sh
+    - name: Compress release folder
+      run: tar --directory=/usr/local --owner=0 --group=0 -zcvf ./ps3dev-latest-bullseye.tar.gz ps3dev
+    - name: Upload SDK
+      uses: actions/upload-artifact@v2
+      with:
+        name: release-artifact
+        path: ./ps3dev-latest-bullseye.tar.gz
+
+  generate-release:
+
+    needs: [build-sdk, build-dev]
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Download all assets
+      uses: actions/download-artifact@v2
+      with:
+        name: release-artifact
+    - name: Get current date
+      id: date
+      run: |
+        echo "::set-output name=date::$(date +'%Y.%m.%d')"
+        echo "::set-output name=time::$(date +'%H%M%S')"
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: "PS3SDK Binaries (${{steps.date.outputs.date}})"
+        body: "- Working SDKs for different Ubuntu and Debian systems."
+        tag_name: "refs/tags/${{steps.date.outputs.date}}_${{steps.date.outputs.time}}"
+        files: ./*.tar.gz
+        prerelease: false
+
