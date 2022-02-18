@@ -16,7 +16,7 @@ jobs:
     - name: Retrieve SDK Scripts
       run: |
         mkdir -p ./build && cd ./build
-        wget --no-check-certificate https://github.com/PSDK3v2-Linux/build/archive/d5d2dea50890cefabca5f36bdae3d2d5fe6d6f04.tar.gz -O psdk3.tar.gz
+        wget --no-check-certificate https://github.com/PSDK3v2-Linux/build/archive/c10c3f3fb315919dd2f76ceb92a56c9d438f209b.tar.gz -O psdk3.tar.gz
         mkdir psdk3 && tar --strip-components=1 --directory=psdk3 -xvzf psdk3.tar.gz
     - name: Build release
       run: ./build/psdk3/build-sudo.sh
@@ -39,7 +39,7 @@ jobs:
     - name: Retrieve SDK Scripts
       run: |
         mkdir -p ./build && cd ./build
-        wget --no-check-certificate https://github.com/PS3SDK-Misc/toolchain-buk/archive/af576772f6403a22892862fbb564109ff52a9a3e.tar.gz -O toolchain.tar.gz
+        wget --no-check-certificate https://github.com/PS3SDK-Misc/toolchain-buk/archive/2554edd3bde9ef60cc6c5066ec88a3dd59588e7c.tar.gz -O toolchain.tar.gz
         mkdir toolchain && tar --strip-components=1 --directory=toolchain -xvzf toolchain.tar.gz
     - name: Build release
       run: ./build/toolchain/toolchain-sudo.sh
